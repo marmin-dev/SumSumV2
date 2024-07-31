@@ -12,7 +12,7 @@ def post_message():
         return {"error": "No input data provided"}, 400
     if 'message' not in data:
         return {"error": "'content' field is required"}, 400
-    res = services.post_message(data['message'])
+    res = services.post_message(data['message'], data['username'], request.remote_addr)
     return jsonify(res)
 
 

@@ -11,7 +11,8 @@ os.environ["OPENAI_API_KEY"] = GPT_KEY
 
 
 # 메시지 보냈을 시
-def post_message(message: str):
+def post_message(message: str, username: str, client_ip):
+    user = create_user(user_ip=client_ip, username=username)
     # 템플릿 시스템 프롬프트 추가
     template = ChatPromptTemplate.from_messages(
         [
@@ -25,7 +26,7 @@ def post_message(message: str):
         temperature=0.4
     )
     reply = llm(template.format_messages(text=message))
-    message_model = Message(question=message, reply=reply.content)
+    message_model = Message(question=message, reply=reply.content, user_id=user.get('user_id'))
     db.session.add(message_model)
     db.session.commit()
     return message_model.to_dict()

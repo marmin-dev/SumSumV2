@@ -11,13 +11,15 @@ class Message(db.Model):
     regdate = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Constructor
-    def __init__(self, question, reply):
-        self.user_id = 1
+    def __init__(self, question, reply, user_id):
+        self.user_id = user_id
         self.question = question
         self.reply = reply
 
     def to_dict(self):
         return {
+            'message_id': self.message_id,
+            'user_id': self.user_id,
             'question': self.question,
             'reply': self.reply
         }
