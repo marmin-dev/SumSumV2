@@ -43,12 +43,24 @@ def create_user(user_ip, username):
         return existed_user.to_dict()
 
 # 해당 유저가 보낸 메시지 확인
-def get_message_by_user(user_ip, username):
-    messages = (Message.query
-                .join(User, Message.user_id == User.user_id)
-                .filter(User.connect_ip == user_ip)
-                .filter(User.username == username)
-                .order_by(Message.message_id.desc())
-                .all()
-                )
+def get_message_by_user(user_ip, username, page):
+    messages_query = (
+        Message.query
+        .join(User, Message.user_id == User.user_id)
+        .filter(User.connect_ip == user_ip)
+        .filter(User.username == username)
+        .order_by(Message.message_id.desc())
+    )
+
+    total_messages = messages_query.count()
+
+    # if page.isnumeric():
+    #     page = int(page)
+
+    messages = (
+        messages_query
+        .limit(20)
+        .offset((page - 1) * 20)
+        .all()
+    )
     return messages

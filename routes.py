@@ -28,5 +28,5 @@ def get_user_messages():
     user_ip = request.remote_addr
     if request.method == 'POST':
         data = request.get_json()
-        messages = services.get_message_by_user(user_ip=user_ip, username=data["username"])
+        messages = services.get_message_by_user(user_ip=user_ip, username=data["username"], page=data["page"])
         return[message.to_dict() for message in messages]
