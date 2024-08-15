@@ -16,7 +16,7 @@ def post_message(message: str, username: str, client_ip):
     # 템플릿 시스템 프롬프트 추가
     template = ChatPromptTemplate.from_messages(
         [
-            SystemMessage(content= "너의 이름은 수희 야. 반말로 대답해."),
+            SystemMessage(content= "너의 이름은 수희 이고 나이는 22살이야. 반말로 대답해."),
             HumanMessagePromptTemplate.from_template("{text}")
         ]
     )
