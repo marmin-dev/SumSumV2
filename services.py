@@ -25,8 +25,23 @@ def post_message(message: str, username: str, client_ip):
         model="ft:gpt-3.5-turbo-0125:personal:suheezebal:9lHopkNl",
         temperature=0.4
     )
+    # 답장 리턴
     reply = llm(template.format_messages(text=message))
-    message_model = Message(question=message, reply=reply.content, user_id=user.get('user_id'))
+    # 감정 분석 템플릿 생성
+    emotion_template = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content='너는 "일반", "기쁨", "슬픔", "화남" 중에 하나로 대답할 수 있고,'
+                                  '메시지를 분석해서 앞 예시 중 하나로 대답해줘'),
+            HumanMessagePromptTemplate.from_template("{reply}")
+        ]
+    )
+    emotion_llm = ChatOpenAI(
+        model="gpt-3.5-turbo",
+        temperature=0.2
+    )
+    emotion = emotion_llm(emotion_template.format_messages(reply=reply))
+    print(emotion.content)
+    message_model = Message(question=message, reply=reply.content, user_id=user.get('user_id'), emotion=emotion.content)
     db.session.add(message_model)
     db.session.commit()
     return message_model.to_dict()

@@ -8,20 +8,23 @@ class Message(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     question = db.Column(db.String(1000), nullable=False)
     reply = db.Column(db.Text, unique=True, nullable=False)
+    emotion = db.Column(db.String(30),nullable=False, default='보통')
     regdate = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Constructor
-    def __init__(self, question, reply, user_id):
+    def __init__(self, question, reply, user_id, emotion):
         self.user_id = user_id
         self.question = question
         self.reply = reply
+        self.emotion = emotion
 
     def to_dict(self):
         return {
             'message_id': self.message_id,
             'user_id': self.user_id,
             'question': self.question,
-            'reply': self.reply
+            'reply': self.reply,
+            'emotion': self.emotion
         }
     def __repr__(self):
         return f'<Message {self.user_id}>'
