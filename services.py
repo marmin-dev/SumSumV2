@@ -16,21 +16,36 @@ def post_message(message: str, username: str, client_ip):
     # 템플릿 시스템 프롬프트 추가
     template = ChatPromptTemplate.from_messages(
         [
-            SystemMessage(content= "너의 이름은 수희 이고 나이는 22살이야. 반말로 대답해."),
+            SystemMessage(content= "너의 이름은 수희 이고 나이는 22살이야. 이전 대화 내역을 보고 현재대화 에 답변해줘"),
             HumanMessagePromptTemplate.from_template("{text}")
         ]
     )
+    # 이전에 대화했던 목록
+    messages = (
+        Message.query
+        .join(User, Message.user_id == User.user_id)
+        .filter(User.connect_ip == client_ip)
+        .filter(User.username == username)
+        .order_by(Message.message_id.desc())
+        .limit(2)
+    ).all()
+    question = ""
+    if len(messages) > 0:
+        for m in messages:
+            question += f"'이전질문': {m.question} 이전대답: {m.reply} "
+    question += f"현재질문: {message}"
+    print(question)
     # 언어 모델 선택
     llm = ChatOpenAI(
         model="ft:gpt-3.5-turbo-0125:personal:suheezebal:9lHopkNl",
         temperature=0.4
     )
     # 답장 리턴
-    reply = llm(template.format_messages(text=message))
+    reply = llm(template.format_messages(text=question))
     # 감정 분석 템플릿 생성
     emotion_template = ChatPromptTemplate.from_messages(
         [
-            SystemMessage(content='너는 "일반", "기쁨", "슬픔", "화남" 중에 하나로 대답할 수 있고,'
+            SystemMessage(content='너는 "보통", "기쁨", "슬픔", "화남" 중에 하나로 대답할 수 있고,'
                                   '메시지를 분석해서 앞 예시 중 하나로 대답해줘'),
             HumanMessagePromptTemplate.from_template("{reply}")
         ]
@@ -45,6 +60,10 @@ def post_message(message: str, username: str, client_ip):
     db.session.add(message_model)
     db.session.commit()
     return message_model.to_dict()
+
+
+
+
 
 # 유저 찾거나 저장 찾아보고 -> 없을 시 저장
 def create_user(user_ip, username):
